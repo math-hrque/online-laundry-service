@@ -1,0 +1,246 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-position: center center;
+    background-size: cover;
+}
+
+.background {
+    background-color: #F2F8FF;;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: left;
+    font-size: 18px;
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.custom-card {
+    border-radius: 30px;
+    padding-left: 25px;
+    padding-top: 10px;
+    padding-right: 25px;
+    padding-bottom: 20px;
+}
+
+.container-form {
+    height: 180px;
+}
+
+.container-consulta-pedido-texto {
+    margin-bottom: 20px;
+}
+
+.consulta-pedido-text {
+    text-align: left;
+    font-size: 30px;
+    font-weight: 300;
+    color: #32445c;
+}
+
+.consulta-pedido-phrase {
+    text-align: left;
+    font-size: 16px;
+    color: #32445c;
+}
+
+.imput-form {
+    flex: 1;
+    max-width: 300px;
+}
+
+.form-floating input:focus ~ label,
+.form-floating input:placeholder-shown ~ label {
+    color: #32445c;
+}
+
+.form-floating input:focus ~ label {
+    color: #6b6771;
+}
+
+.form-floating label {
+    margin-top: -2px;
+}
+
+.custom-input:focus {
+    border-color: #6fb5df;
+    box-shadow: 0 0 0 0.2rem #a5d7f3;
+}
+
+.custom-input:hover {
+    outline: none;
+    border-color: #6fb5df;
+    cursor: text;
+}
+
+.invalid-border {
+    border-color: red;
+}
+
+.custom-btn {
+    background-color: #3dabe1;
+    color: #fff;
+    border: none;
+    border-radius: 30px; 
+    padding: 10px 20px;
+    font-size: 18px;
+    cursor: pointer; 
+    letter-spacing: inherit;
+    margin-top: 6px;
+}
+
+.custom-btn:hover {
+    background-color: #1c8bc1;
+}
+
+.custom-btn:active {
+    background-color: #66c0eb;
+}
+
+.custom-btn:disabled {
+    background-color: #66c0eb;
+}
+
+.custom-btn-consultar, .custom-btn-voltar {
+    width: 120px;
+}
+
+.custom-btn-consultar {
+    margin-left: 20px;
+}
+
+.custom-btn-voltar {
+    margin-top: 35px;
+}
+
+.alert-container {
+    margin: 0 auto;
+    max-width: 890px;
+    width: fit-content;
+}
+
+.container-dados-pedido {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.container-card-pedido-codigo {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #32445c;
+    font-size: 18px;
+    font-weight: 900;
+    background-color: #dcf2ff;
+    border-color: #ccc;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.container-situacao-prazo-pedido-text {
+    color: #32445c;
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    display: flex;
+}
+
+.container-situacao-text, .container-prazo-pedido-text {
+    flex: 1;
+}
+
+.container-situacao-text {
+    padding-left: 8px;
+}
+
+.text-yellow {
+    color: #ffd500;
+}
+  
+.text-red {
+    color: #d90429;
+}
+  
+.text-gray {
+    color: #6c757d;
+}
+  
+.text-blue {
+    color: #00b4d8;
+}
+  
+.text-orange {
+    color: #f48c06;
+}
+  
+.text-green {
+    color: #52b788;
+}
+
+.container-table .table thead tr{
+    position: sticky;
+    top: 0;
+}
+
+.container-table thead th {
+    background-color: #f2f2f2;
+    border-right: 1px solid #ccc;
+}
+
+.alarm-table {
+    max-height: 280px;
+    overflow: auto;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+
+.table-items-body td{
+    color: #32445c;
+    font-size: 18px;
+    font-weight: 500;
+    width: 50.5%;
+}
+
+.container-table tbody td, .container-table tfoot th {
+    border-right: 1px solid #ccc;
+}
+
+.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+    background-color: #e2f5fff1;
+}
+
+.custom-headers-tfoot th {
+    background-color: #f2f2f2;
+    color: #32445c;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+
+.valor-text {
+    color: #32445c;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    border-radius: 10px;
+}

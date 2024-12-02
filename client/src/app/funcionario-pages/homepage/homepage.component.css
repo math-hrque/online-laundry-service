@@ -1,0 +1,94 @@
+.text-center {
+    text-align: center; 
+}
+
+.container {
+    max-width: 80%; 
+    margin: 20px auto; 
+}
+
+
+.shadow-lg {
+    background-color: #fff; 
+    border-radius: 10px; 
+    padding: 20px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    margin: 20px auto; 
+}
+
+.table {
+    width: 100%; 
+    border-collapse: collapse;
+}
+
+
+thead th {
+    font-weight: bold;
+    text-align: center; 
+    background-color: #f8f9fa; 
+}
+
+
+td,
+th {
+    border: 3px solid white;
+    padding: 12px; 
+    text-align: center; 
+    vertical-align: middle; 
+    background-color: inherit; 
+}
+
+.table-warning td {
+    background-color: #fff3cd;
+}
+
+.table-danger td {
+    background-color: #f8d7da;
+}
+
+.table-secondary td {
+    background-color: #e2e3e5; 
+}
+
+.table-info td {
+    background-color: #d1ecf1; 
+}
+
+.table-success td {
+    background-color: #d4edda; 
+}
+
+.table-primary td {
+    background-color: #cce5ff; 
+}
+
+
+ul.list-inline {
+    padding: 0;
+    margin: 0; 
+    list-style: none; 
+    text-align: left; 
+}
+
+ul.list-inline li {
+    margin-bottom: 4px; 
+}
+
+.btn-success {
+    background-color: #28a745; 
+    color: white;
+    border: none; 
+    padding: 8px 16px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+}
+
+.btn-success:hover {
+    background-color: #218838; 
+}
+
+
+.text-center p {
+    margin: 0; 
+    font-size: 16px;
+}

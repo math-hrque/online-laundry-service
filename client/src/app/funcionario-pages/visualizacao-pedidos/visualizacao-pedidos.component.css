@@ -1,0 +1,162 @@
+.amarelo {
+  background-color: yellow;
+}
+
+.vermelho {
+  background-color: red;
+}
+
+.cinza {
+  background-color: gray;
+}
+
+.azul {
+  background-color: blue;
+}
+
+.laranja {
+  background-color: orange;
+}
+
+.verde {
+  background-color: green;
+}
+
+.roxo {
+  background-color: purple;
+}
+
+.text-center {
+  text-align: center;
+}
+
+
+.dtInput {
+  margin: 5px;
+  border-radius: 4px;
+}
+
+.dtLabel {
+  margin-left: 30px;
+}
+
+.filter {
+  width: 40%;
+  margin: 0 auto; 
+}
+
+.btn-filter {
+  padding: 8px 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+}
+
+.card {
+    background-color: #fff;
+    border-radius: 10px; 
+    padding: 20px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    max-width: 80%; 
+    border: none; 
+  }
+  
+table {
+    width: 100%;
+    margin: 0 auto; 
+    border-collapse: collapse;
+  }
+  ul {
+    list-style-type: none; 
+    margin: 0; 
+    padding: 0; 
+  }
+  
+  
+  li {
+    margin: 0; 
+    padding: 4px 0; 
+  }
+  
+  td,
+  th {
+    border: 3px solid white; 
+    padding: 12px; 
+    text-align: center; 
+    vertical-align: middle; 
+    background-color: inherit;
+  }
+  
+  thead th {
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  tbody tr {
+    transition: background-color 0.3s; 
+  }
+  
+  tbody tr:hover {
+    background-color: #f1f1f1; 
+  }
+  
+  .table-warning td {
+    background-color: #fff3cd; 
+  }
+  
+  .table-danger td {
+    background-color: #f8d7da; 
+  }
+  
+  .table-secondary td {
+    background-color: #e2e3e5;
+  }
+  
+  .table-info td {
+    background-color: #d1ecf1; 
+  }
+  
+  .table-success td {
+    background-color: #d4edda; 
+  }
+  
+  .table-primary td {
+    background-color: #cce5ff; 
+  }
+  
+.date-filter {
+  display: flex;
+  flex-direction: column; 
+  align-items: center; 
+  margin: 0 auto; 
+}
+
+.date-filter > * {
+  margin: 5px; 
+}
+
+.date-filter .date-group {
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+}
+
+.date-filter .date-group label,
+.date-filter .date-group input {
+  margin: 0 10px; 
+}
+
+.btn-filter {
+  margin-top: 10px;
+}
+
+.table-header-bg {
+    background-color: #f8f9fa;
+  }
+  

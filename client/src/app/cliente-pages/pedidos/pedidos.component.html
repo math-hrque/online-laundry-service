@@ -1,0 +1,83 @@
+<br />
+<h1 class="text-center">Visualização de Pedidos</h1>
+<div class="filter">
+  <select
+    #selectElement
+    (change)="filtroPedidos(selectElement.value)"
+    class="form-select"
+  >
+    <option value="EM_ABERTO">EM ABERTO</option>
+    <option value="AGUARDANDO_PAGAMENTO">AGUARDANDO PAGAMENTO</option>
+  </select>
+</div>
+
+<div>
+  <br />
+  <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+    <div id="listaPedidos">
+      <table class="table">
+        <thead class="table-header-bg">
+          <tr>
+            <th scope="col">Pedido</th>
+            <th scope="col">Data Criação</th>
+            <th scope="col">Roupas</th>
+            <th scope="col">Prazo do serviço</th>
+            <th scope="col">Situação</th>
+            <th scope="col">Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let pedido of orderedPedidos"
+            [ngClass]="{
+              'table-warning': pedido.situacao === statusEnum.EM_ABERTO,
+              'table-danger':
+                pedido.situacao === statusEnum.REJEITADO ||
+                pedido.situacao === statusEnum.CANCELADO,
+              'table-secondary': pedido.situacao === statusEnum.RECOLHIDO,
+              'table-info': pedido.situacao === statusEnum.AGUARDANDO_PAGAMENTO,
+              'table-success': pedido.situacao === statusEnum.PAGO,
+              'table-primary': pedido.situacao === statusEnum.FINALIZADO
+            }"
+          >
+            <td>{{ pedido.numeroPedido }}</td>
+            <td>{{ formatDate(pedido.dataPedido) }}</td>
+
+            <td>
+              <ul
+                *ngFor="let roupa of pedido.listaPedidoRoupas"
+                class="roupa-list"
+              >
+                <li>
+                  Peça: {{ roupa.roupa.descricao }}, Prazo:
+                  {{ roupa.roupa.prazoDias }} dia(s), Preço: R$
+                  {{ roupa.roupa.preco }}, Quantidade: {{ roupa.quantidade }}
+                </li>
+              </ul>
+            </td>
+
+            <td>{{ formatDatePlus(pedido.orcamento.dataPrazo) }}</td>
+
+            <td [ngClass]="pedido.situacao">
+              {{ formatSituacao(pedido.situacao) }}
+            </td>
+            <td>
+              <button
+                *ngIf="getButtonLabel(pedido.situacao) !== null"
+                class="btn"
+                [ngClass]="getButtonClass(pedido.situacao)"
+                (click)="
+                  pedido.situacao === 'AGUARDANDO_PAGAMENTO'
+                    ? pagar(pedido)
+                    : handleAction(pedido)
+                "
+              >
+                {{ getButtonLabel(pedido.situacao) }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
