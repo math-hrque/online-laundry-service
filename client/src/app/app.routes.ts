@@ -17,14 +17,9 @@ import { authGuard } from './auth/auth.guard';
 import { HomepageClienteComponent } from './cliente-pages/homepage-cliente';
 
 export const routes: Routes = [
-  //default
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-
-  //auth
   { path: 'login', title: 'Login', component: LoginComponent },
   { path: 'cadastro', title: 'Cadastro', component: CadastroComponent },
-
-  //cliente-pages
   {
     path: 'homepage-cliente',
     title: 'homepage-cliente',
@@ -70,8 +65,6 @@ export const routes: Routes = [
       role: 'CLIENTE',
     },
   },
-
-  //funcionario-pages
   {
     path: 'homepage',
     title: 'Homepage',
@@ -135,7 +128,5 @@ export const routes: Routes = [
       role: 'FUNCIONARIO',
     },
   },
-
-  //components
   { path: '**', title: 'Error 404', component: PageNotFoundComponent },
 ];

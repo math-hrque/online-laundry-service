@@ -1,9 +1,6 @@
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
-import { Usuario } from '../shared/models/usuario.model';
-import { RelatorioCliente } from '../shared/models/relatorio-cliente.model';
-import { ClienteFiel } from '../shared/models/cliente-fiel.model';
 import { Cliente } from '../shared/models/cliente.model';
 import { ClienteDto } from '../shared/models/dto/cliente-dto.model';
 

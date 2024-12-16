@@ -8,16 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class FuncionarioDTO {
-    @Setter @Getter
     private Long idFuncionario;
-
-    @Setter @Getter
     private LocalDate dataNascimento;
-
-    @Setter @Getter
     private UsuarioResponseDTO usuario;
 
     public FuncionarioDTO(Funcionario funcionario) {

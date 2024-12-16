@@ -11,18 +11,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="situacao")
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name="situacao")
 public class Situacao implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="id_situacao")
-    @Setter @Getter
     private Long idSituacao;
 
     @Enumerated(EnumType.STRING)
     @Column(name="tipo_situacao", insertable = false, updatable = false, nullable = false, unique = true)
-    @Setter @Getter
     private TipoSituacao tipoSituacao;
 }

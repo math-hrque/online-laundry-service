@@ -7,12 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReceitaDTO {
-    @Setter @Getter
     private LocalDate data;
-
-    @Setter @Getter
     private Double receita;
 }

@@ -5,12 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsuarioRequestDTO {
-    @Setter @Getter
     private String email;
-
-    @Setter @Getter
     private String senha;
 }

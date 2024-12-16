@@ -6,28 +6,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class EnderecoDTO {
-    @Setter @Getter
     private String cep;
-
-    @Setter @Getter
     private String uf;
-
-    @Setter @Getter
     private String cidade;
-
-    @Setter @Getter
     private String bairro;
-
-    @Setter @Getter
     private String rua;
-
-    @Setter @Getter
     private String numero;
-
-    @Setter @Getter
     private String complemento;
 
     public EnderecoDTO(Endereco endereco) {

@@ -1,7 +1,6 @@
 import { Cliente } from "./cliente.model";
 import { Orcamento } from "./orcamento.model";
 import { PedidoRoupa } from "./pedido-roupa.model";
-import { Situacao } from "./situacao.model";
 
 export class Pedido {
     id: number = 0;

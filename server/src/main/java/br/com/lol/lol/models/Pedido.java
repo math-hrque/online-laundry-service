@@ -21,48 +21,41 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 @Entity
-@Table(name="pedido")
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name="pedido")
 public class Pedido implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="id_pedido")
-    @Setter @Getter
     private Long idPedido;
 
     @Column(name="numero_pedido", updatable = false, nullable = false, unique = true)
-    @Setter @Getter
     private Long numeroPedido;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="data_pedido", insertable = false, updatable = false, nullable = false)
-    @Setter @Getter
     private OffsetDateTime dataPedido;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="data_pagamento", insertable = false)
-    @Setter @Getter
     private OffsetDateTime dataPagamento;
 
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="id_cliente", updatable = false, nullable = false)
-    @Setter @Getter
     private Cliente cliente;
 
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="id_situacao", nullable = false)
-    @Setter @Getter
     private Situacao situacao;
 
     @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name="id_orcamento")
-    @Setter @Getter
     private Orcamento orcamento;
 
     @OneToMany(mappedBy="pedido", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
-    @Setter @Getter
     private List<PedidoRoupa> listaPedidoRoupas;
 
     public void cadastrar(PedidoDTO pedidoDTO, Situacao situacao) {

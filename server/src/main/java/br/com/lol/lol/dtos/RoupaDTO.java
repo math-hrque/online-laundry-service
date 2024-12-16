@@ -6,19 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoupaDTO {
-    @Setter @Getter
     private Long idRoupa;
-
-    @Setter @Getter
     private String descricao;
-
-    @Setter @Getter
     private double preco;
-
-    @Setter @Getter
     private int prazoDias;
 
     public RoupaDTO(Roupa roupa) {

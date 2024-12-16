@@ -6,13 +6,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PedidoRoupaDTO {
-    @Setter @Getter
     private int quantidade;
-    
-    @Setter @Getter
     private RoupaDTO roupa;
 
     public PedidoRoupaDTO(PedidoRoupa pedidoRoupa) {

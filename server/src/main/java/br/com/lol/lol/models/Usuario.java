@@ -9,30 +9,26 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="usuario")
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name="usuario")
 public class Usuario implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="id_usuario")
-    @Setter @Getter
     private Long idUsuario;
 
     @Column(name="email", unique = true)
-    @Setter @Getter
     private String email;
 
     @Column(name="senha")
-    @Setter @Getter
     private String senha;
 
     @Column(name="nome")
-    @Setter @Getter
     private String nome;
 
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="id_permissao")
-    @Setter @Getter
     private Permissao permissao;
 }

@@ -7,19 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsuarioResponseDTO {
-    @Setter @Getter
     private Long idUsuario;
-
-    @Setter @Getter
     private String email;
-
-    @Setter @Getter
     private String nome;
-
-    @Setter @Getter
     private TipoPermissao tipoPermissao;
 
     public UsuarioResponseDTO(Usuario usuario) {

@@ -11,30 +11,26 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="roupa")
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name="roupa")
 public class Roupa implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="id_roupa")
-    @Setter @Getter
     private Long idRoupa;
 
     @Column(name="descricao", nullable = false)
-    @Setter @Getter
     private String descricao;
 
     @Column(name="preco", nullable = false)
-    @Setter @Getter
     private double preco;
 
     @Column(name="prazo_dias", nullable = false)
-    @Setter @Getter
     private int prazoDias;
 
     @Column(name="ativo", insertable = false)
-    @Setter @Getter
     private boolean ativo = true;
 
     public void cadastrar(RoupaDTO roupaDTO) {

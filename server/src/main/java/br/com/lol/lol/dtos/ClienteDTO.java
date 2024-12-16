@@ -6,22 +6,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClienteDTO {
-    @Setter @Getter
     private Long idCliente;
-
-    @Setter @Getter
     private String cpf;
-
-    @Setter @Getter
     private String telefone;
-
-    @Setter @Getter
     private EnderecoDTO endereco;
-
-    @Setter @Getter
     private UsuarioResponseDTO usuario;
 
     public ClienteDTO(Cliente cliente) {

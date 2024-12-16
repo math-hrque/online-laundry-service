@@ -18,25 +18,20 @@ import { HomepageClienteComponent } from './cliente-pages/homepage-cliente';
     templateUrl: './app.component.html',
     styleUrl: './app.component.css',
     imports: [
-      //angular
       CommonModule,
       RouterOutlet,
 
-      //auth
       LoginComponent,
       CadastroComponent,
 
-      //cliente-pages
       HomepageClienteComponent,
       PedidosComponent,
       PedidoComponent,
       ConsultaPedidoComponent,
 
-      //funcionario-pages
       ManutencaoRoupasComponent,
       RelatorioReceitasComponent,
 
-      //components
       PageNotFoundComponent,
       NavbarComponent,
     ]

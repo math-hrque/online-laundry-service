@@ -5,15 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClienteFielDTO {
-    @Setter @Getter
     private ClienteDTO cliente;
-
-    @Setter @Getter
     private int quantidadePedidos;
-
-    @Setter @Getter
     private Double receita;
 }

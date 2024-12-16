@@ -19,7 +19,6 @@ public class FlywayConfig {
     @Bean
     public CommandLineRunner migrateDatabase(Flyway flyway, PasswordEncoder passwordEncoder, DataSource dataSource) {
         return args -> {
-            //flyway.clean();
             flyway.migrate();
 
             String selectQuery = "SELECT email, nome FROM usuario WHERE senha = '{bcrypt}'";

@@ -15,28 +15,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PedidoDTO {
-    @Setter @Getter
     private Long numeroPedido;
-
-    @Setter @Getter
     private LocalDateTime dataPedido;
-
-    @Setter @Getter
     private LocalDateTime dataPagamento;
-
-    @Setter @Getter
     private Long idCliente;
-
-    @Setter @Getter
     private TipoSituacao situacao;
-
-    @Setter @Getter
     private Orcamento orcamento;
-
-    @Setter @Getter
     private List<PedidoRoupaDTO> listaPedidoRoupas;
 
     public PedidoDTO(Pedido pedido) {
