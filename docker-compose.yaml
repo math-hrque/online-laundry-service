@@ -1,0 +1,47 @@
+services:
+
+  # DATABASE
+  postgres-db:
+    image: postgres
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lol
+    networks:
+      - laundry-network
+
+  # SERVER
+  server:
+    container_name: server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres-db
+    networks:
+      - laundry-network
+  
+  # CLIENT
+  client:
+    container_name: client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    networks:
+      - laundry-network
+
+networks:
+  laundry-network:
+    driver: bridge
