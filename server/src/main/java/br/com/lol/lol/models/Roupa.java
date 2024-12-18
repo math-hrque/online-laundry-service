@@ -2,7 +2,6 @@ package br.com.lol.lol.models;
 
 import java.io.Serializable;
 
-import br.com.lol.lol.dtos.RoupaDTO;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -19,7 +18,7 @@ public class Roupa implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="id_roupa")
-    private Long idRoupa;
+    private Long idRoupa = 0L;
 
     @Column(name="descricao", nullable = false)
     private String descricao;
@@ -32,20 +31,6 @@ public class Roupa implements Serializable {
 
     @Column(name="ativo", insertable = false)
     private boolean ativo = true;
-
-    public void cadastrar(RoupaDTO roupaDTO) {
-        this.idRoupa = 0L;
-        this.descricao = roupaDTO.getDescricao();
-        this.preco = roupaDTO.getPreco();
-        this.prazoDias = roupaDTO.getPrazoDias();
-    }
-
-    public void atualizar(Long idRoupa, RoupaDTO roupaDTO) {
-        this.idRoupa = idRoupa;
-        this.descricao = roupaDTO.getDescricao();
-        this.preco = roupaDTO.getPreco();
-        this.prazoDias = roupaDTO.getPrazoDias();
-    }
 
     public void inativar() {
         this.ativo = false;

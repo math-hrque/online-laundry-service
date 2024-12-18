@@ -4,16 +4,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import br.com.lol.lol.dtos.PedidoDTO;
 import br.com.lol.lol.enums.TipoSituacao;
+import br.com.lol.lol.exeptions.ClienteNaoExisteException;
+import br.com.lol.lol.exeptions.ListaPedidoVaziaException;
+import br.com.lol.lol.exeptions.PedidoNaoExisteException;
+import br.com.lol.lol.exeptions.SituacaoPedidoInvalidaException;
+import br.com.lol.lol.exeptions.SituacaoPedidoNaoExisteException;
 import br.com.lol.lol.models.Cliente;
 import br.com.lol.lol.models.Pedido;
 import br.com.lol.lol.models.Situacao;
@@ -25,6 +26,9 @@ import br.com.lol.lol.repositories.SituacaoRepository;
 public class PedidoService {
 
     @Autowired
+    private ModelMapper mapper;
+
+    @Autowired
     private PedidoRepository pedidoRepository;
 
     @Autowired
@@ -33,222 +37,137 @@ public class PedidoService {
     @Autowired
     private SituacaoRepository situacaoRepository;
     
-    public ResponseEntity<PedidoDTO> cadastrar(@RequestBody PedidoDTO pedidoDTO) {
-        if (validaDadosCadastrarPedido(pedidoDTO)) {
-            Optional<Cliente> cliente = clienteRepository.findById(pedidoDTO.getIdCliente());
-            if (cliente.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else {
-                if (pedidoDTO.getOrcamento().isAprovado()) {
-                    Optional<Situacao> situacao = situacaoRepository.findByTipoSituacao(TipoSituacao.EM_ABERTO);
-                    if (situacao.isPresent()) {
-                        Pedido pedido = new Pedido();
-                        pedido.cadastrar(pedidoDTO, situacao.get());
-                        Optional<Long> ultimoNumeroPedido = pedidoRepository.findMaxNumeroPedido();
-                        if (ultimoNumeroPedido.isPresent()) {
-                            pedido.setNumeroPedido(ultimoNumeroPedido.get() + 1L);
-                        } else {
-                            pedido.setNumeroPedido(10000L);
-                        }
-                        Pedido pedidoSalva = pedidoRepository.save(pedido);
-                        PedidoDTO pedidoDTOSalva = new PedidoDTO(pedidoSalva);
-                        return ResponseEntity.status(HttpStatus.CREATED).body(pedidoDTOSalva);
-                    } else {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-                    }
-                } else if (!pedidoDTO.getOrcamento().isAprovado()) {
-                    Optional<Situacao> situacao = situacaoRepository.findByTipoSituacao(TipoSituacao.REJEITADO);
-                    if (situacao.isPresent()) {
-                        Pedido pedido = new Pedido();
-                        pedido.cadastrar(pedidoDTO, situacao.get());
-                        Optional<Long> ultimoNumeroPedido = pedidoRepository.findMaxNumeroPedido();
-                        if (ultimoNumeroPedido.isPresent()) {
-                            pedido.setNumeroPedido(ultimoNumeroPedido.get() + 1L);
-                        } else {
-                            pedido.setNumeroPedido(10000L);
-                        }
-                        Pedido pedidoSalva = pedidoRepository.save(pedido);
-                        PedidoDTO pedidoDTOSalva = new PedidoDTO(pedidoSalva);
-                        return ResponseEntity.status(HttpStatus.CREATED).body(pedidoDTOSalva);
-                    } else {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-                    }
-                } else {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                }
-                
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    public PedidoDTO cadastrar(PedidoDTO pedidoDTO) throws ClienteNaoExisteException, SituacaoPedidoNaoExisteException {
+        Optional<Cliente> cliente = clienteRepository.findById(pedidoDTO.getIdCliente());
+        if (!cliente.isPresent()) {
+            throw new ClienteNaoExisteException("Cliente nao existe!");
         }
+        
+        TipoSituacao tipoSituacao = pedidoDTO.getOrcamento().isAprovado() ? TipoSituacao.EM_ABERTO : TipoSituacao.REJEITADO;
+        Situacao situacao = situacaoRepository.findByTipoSituacao(tipoSituacao).orElseThrow(() -> new SituacaoPedidoNaoExisteException("Situação do pedido não encontrada!"));
+
+        Pedido pedido = mapper.map(pedidoDTO, Pedido.class);
+        pedido.setIdPedido(0L);
+        pedido.setSituacao(situacao);
+
+        Optional<Long> ultimoNumeroPedido = pedidoRepository.findMaxNumeroPedido();
+        if (ultimoNumeroPedido.isPresent()) {
+            pedido.setNumeroPedido(ultimoNumeroPedido.get() + 1L);
+        } else {
+            pedido.setNumeroPedido(10000L);
+        }
+
+        Pedido pedidoCadastrado = pedidoRepository.save(pedido);
+        PedidoDTO pedidoCadastradoDto = mapper.map(pedidoCadastrado, PedidoDTO.class);
+        return pedidoCadastradoDto;
     }
 
-    public ResponseEntity<PedidoDTO> atualizarPorCliente(@PathVariable("numeroPedido") Long numeroPedido, @RequestBody PedidoDTO pedidoDTO) {
-        if (validaDadosAtualizarPedidoPorCliente(pedidoDTO)) {
-            Optional<Pedido> pedidoBD = pedidoRepository.findByNumeroPedido(numeroPedido);
-            if (pedidoBD.isPresent()) {
-                switch (pedidoDTO.getSituacao()) {
-                    case CANCELADO:
-                        if (pedidoBD.get().getSituacao().getTipoSituacao().equals(TipoSituacao.EM_ABERTO)) {
-                            Optional<Situacao> situacao = situacaoRepository.findByTipoSituacao(pedidoDTO.getSituacao());
-                            if (situacao.isPresent()) {
-                                pedidoBD.get().setSituacao(situacao.get());
-                                Pedido pedidoSalva = pedidoRepository.save(pedidoBD.get());
-                                PedidoDTO pedidoDTOSalva = new PedidoDTO(pedidoSalva);
-                                return ResponseEntity.status(HttpStatus.CREATED).body(pedidoDTOSalva);
-                            } else {
-                                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-                            }
-                        } else {
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                        }
-                    case PAGO:
-                        if (pedidoBD.get().getSituacao().getTipoSituacao().equals(TipoSituacao.AGUARDANDO_PAGAMENTO)) {
-                            Optional<Situacao> situacao = situacaoRepository.findByTipoSituacao(pedidoDTO.getSituacao());
-                            if (situacao.isPresent()) {
-                                pedidoBD.get().pagar(situacao.get());
-                                Pedido pedidoSalva = pedidoRepository.save(pedidoBD.get());
-                                PedidoDTO pedidoDTOSalva = new PedidoDTO(pedidoSalva);
-                                return ResponseEntity.status(HttpStatus.CREATED).body(pedidoDTOSalva);
-                            } else {
-                                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-                            }
-                        } else {
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                        }
-                    default:
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                }
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    public PedidoDTO atualizarPorCliente(Long numeroPedido, PedidoDTO pedidoDTO) throws PedidoNaoExisteException, SituacaoPedidoInvalidaException, SituacaoPedidoNaoExisteException {
+        Optional<Pedido> pedidoBD = pedidoRepository.findByNumeroPedido(numeroPedido);
+        if (!pedidoBD.isPresent()) {
+            throw new PedidoNaoExisteException("Pedido nao existe com esse numeroPedido!");
         }
+
+        switch (pedidoDTO.getSituacao()) {
+            case CANCELADO:
+                if (pedidoBD.get().getSituacao().getTipoSituacao().equals(TipoSituacao.EM_ABERTO)) {
+                    Situacao situacao = situacaoRepository.findByTipoSituacao(TipoSituacao.CANCELADO).orElseThrow(() -> new SituacaoPedidoNaoExisteException("Situação do pedido não encontrada!"));
+                    pedidoBD.get().setSituacao(situacao);
+                    break;
+                }
+                throw new SituacaoPedidoInvalidaException("Mudanca de situacao do pedido nao permitida!");
+            case PAGO:
+                if (pedidoBD.get().getSituacao().getTipoSituacao().equals(TipoSituacao.AGUARDANDO_PAGAMENTO)) {
+                    Situacao situacao = situacaoRepository.findByTipoSituacao(TipoSituacao.PAGO).orElseThrow(() -> new SituacaoPedidoNaoExisteException("Situação do pedido não encontrada!"));
+                    pedidoBD.get().setSituacao(situacao);
+                    pedidoBD.get().pagar();
+                    break;
+                }
+                throw new SituacaoPedidoInvalidaException("Mudanca de situacao do pedido nao permitida!");
+            default:
+                throw new SituacaoPedidoInvalidaException("Situacao do pedido invalida!");
+        }
+
+        Pedido pedidoAtualizado = pedidoRepository.save(pedidoBD.get());
+        PedidoDTO pedidoAtualizadoDto = mapper.map(pedidoAtualizado, PedidoDTO.class);
+        return pedidoAtualizadoDto;
     }
 
-    public ResponseEntity<PedidoDTO> atualizarPorFuncionario(@PathVariable("numeroPedido") Long numeroPedido, @RequestBody PedidoDTO pedidoDTO) {
-        if (validaDadosAtualizarPedidoPorFuncionario(pedidoDTO)) {
-            Optional<Pedido> pedidoBD = pedidoRepository.findByNumeroPedido(numeroPedido);
-            if (pedidoBD.isPresent()) {
-                switch (pedidoDTO.getSituacao()) {
-                    case RECOLHIDO:
-                        if (pedidoBD.get().getSituacao().getTipoSituacao().equals(TipoSituacao.EM_ABERTO)) {
-                            Optional<Situacao> situacao = situacaoRepository.findByTipoSituacao(pedidoDTO.getSituacao());
-                            if (situacao.isPresent()) {
-                                pedidoBD.get().setSituacao(situacao.get());
-                                Pedido pedidoSalva = pedidoRepository.save(pedidoBD.get());
-                                PedidoDTO pedidoDTOSalva = new PedidoDTO(pedidoSalva);
-                                return ResponseEntity.status(HttpStatus.CREATED).body(pedidoDTOSalva);
-                            } else {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                            }
-                        } else {
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                        }
-                    case AGUARDANDO_PAGAMENTO:
-                        if (pedidoBD.get().getSituacao().getTipoSituacao().equals(TipoSituacao.RECOLHIDO)) {
-                            Optional<Situacao> situacao = situacaoRepository.findByTipoSituacao(pedidoDTO.getSituacao());
-                            if (situacao.isPresent()) {
-                                pedidoBD.get().setSituacao(situacao.get());
-                                Pedido pedidoSalva = pedidoRepository.save(pedidoBD.get());
-                                PedidoDTO pedidoDTOSalva = new PedidoDTO(pedidoSalva);
-                                return ResponseEntity.status(HttpStatus.CREATED).body(pedidoDTOSalva);
-                            } else {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                            }
-                        } else {
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                        }
-                    case FINALIZADO:
-                        if (pedidoBD.get().getSituacao().getTipoSituacao().equals(TipoSituacao.PAGO)) {
-                            Optional<Situacao> situacao = situacaoRepository.findByTipoSituacao(pedidoDTO.getSituacao());
-                            if (situacao.isPresent()) {
-                                pedidoBD.get().setSituacao(situacao.get());
-                                Pedido pedidoSalva = pedidoRepository.save(pedidoBD.get());
-                                PedidoDTO pedidoDTOSalva = new PedidoDTO(pedidoSalva);
-                                return ResponseEntity.status(HttpStatus.CREATED).body(pedidoDTOSalva);
-                            } else {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                            }
-                        } else {
-                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                        }
-                    default:
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                }
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    public PedidoDTO atualizarPorFuncionario(Long numeroPedido, PedidoDTO pedidoDTO) throws PedidoNaoExisteException, SituacaoPedidoInvalidaException, SituacaoPedidoNaoExisteException {
+        Optional<Pedido> pedidoBD = pedidoRepository.findByNumeroPedido(numeroPedido);
+        if (!pedidoBD.isPresent()) {
+            throw new PedidoNaoExisteException("Pedido nao existe com esse numeroPedido!");
         }
+
+        switch (pedidoDTO.getSituacao()) {
+            case RECOLHIDO:
+                if (pedidoBD.get().getSituacao().getTipoSituacao().equals(TipoSituacao.EM_ABERTO)) {
+                    Situacao situacao = situacaoRepository.findByTipoSituacao(TipoSituacao.RECOLHIDO).orElseThrow(() -> new SituacaoPedidoNaoExisteException("Situação do pedido não encontrada!"));
+                    pedidoBD.get().setSituacao(situacao);
+                    break;
+                }
+                throw new SituacaoPedidoInvalidaException("Mudanca de situacao do pedido nao permitida!");
+            case AGUARDANDO_PAGAMENTO:
+                if (pedidoBD.get().getSituacao().getTipoSituacao().equals(TipoSituacao.RECOLHIDO)) {
+                    Situacao situacao = situacaoRepository.findByTipoSituacao(TipoSituacao.AGUARDANDO_PAGAMENTO).orElseThrow(() -> new SituacaoPedidoNaoExisteException("Situação do pedido não encontrada!"));
+                    pedidoBD.get().setSituacao(situacao);
+                    break;
+                }
+                throw new SituacaoPedidoInvalidaException("Mudanca de situacao do pedido nao permitida!");
+            case FINALIZADO:
+                if (pedidoBD.get().getSituacao().getTipoSituacao().equals(TipoSituacao.PAGO)) {
+                    Situacao situacao = situacaoRepository.findByTipoSituacao(TipoSituacao.FINALIZADO).orElseThrow(() -> new SituacaoPedidoNaoExisteException("Situação do pedido não encontrada!"));
+                    pedidoBD.get().setSituacao(situacao);
+                    break;
+                }
+                throw new SituacaoPedidoInvalidaException("Mudanca de situacao do pedido nao permitida!");
+            default:
+                throw new SituacaoPedidoInvalidaException("Situacao do pedido invalida!");
+        }
+
+        Pedido pedidoAtualizado = pedidoRepository.save(pedidoBD.get());
+        PedidoDTO pedidoAtualizadoDto = mapper.map(pedidoAtualizado, PedidoDTO.class);
+        return pedidoAtualizadoDto;
     }
 
-    public ResponseEntity<PedidoDTO> consultar(@RequestParam("numeroPedido") Long numeroPedido, @RequestParam("idCliente") Long idCliente) {
+    public PedidoDTO consultar(Long numeroPedido, Long idCliente) throws PedidoNaoExisteException {
         Optional<Pedido> pedidoBD = pedidoRepository.findByNumeroPedidoAndClienteIdCliente(numeroPedido, idCliente);
-        if (pedidoBD.isPresent()) {
-            PedidoDTO pedidoDTO = new PedidoDTO(pedidoBD.get());
-            return ResponseEntity.ok(pedidoDTO);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if (!pedidoBD.isPresent()) {
+            throw new PedidoNaoExisteException("Pedido nao existe para esse numeroPedido e cliente!");
         }
+
+        PedidoDTO pedidoConsultadoDto = mapper.map(pedidoBD.get(), PedidoDTO.class);
+        return pedidoConsultadoDto;
     }
 
-    public ResponseEntity<List<PedidoDTO>> listar() {
+    public List<PedidoDTO> listar() throws ListaPedidoVaziaException {
         List<Pedido> listaPedidoBD = pedidoRepository.findAll();
-        if (listaPedidoBD.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } else {
-            List<PedidoDTO> listaPedidoDTO = listaPedidoBD.stream().map(pedido -> {
-                PedidoDTO pedidoDTO = new PedidoDTO(pedido);
-                return pedidoDTO;
-            }).collect(Collectors.toList());
-            return ResponseEntity.ok(listaPedidoDTO);
+        if (listaPedidoBD.isEmpty() || listaPedidoBD.isEmpty()) {
+            throw new ListaPedidoVaziaException("Lista de pedidos vazia!");
         }
+
+        List<PedidoDTO> listaPedidoDto = listaPedidoBD.stream().map(pedidoBD -> mapper.map(pedidoBD, PedidoDTO.class)).collect(Collectors.toList());
+        return listaPedidoDto;
     }
 
-    public ResponseEntity<List<PedidoDTO>> listarPorIdUsuario(@PathVariable("idUsuario") Long idUsuario) {
+    public List<PedidoDTO> listarPorIdUsuario(Long idUsuario) throws ListaPedidoVaziaException {
         Optional<List<Pedido>> listaPedidoBD = pedidoRepository.findByClienteUsuarioIdUsuario(idUsuario);
-        if (listaPedidoBD.get().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } else {
-            List<PedidoDTO> listaPedidoDTO = listaPedidoBD.get().stream().map(pedido -> {
-                PedidoDTO pedidoDTO = new PedidoDTO(pedido);
-                return pedidoDTO;
-            }).collect(Collectors.toList());
-            return ResponseEntity.ok(listaPedidoDTO);
+        if (!listaPedidoBD.isPresent() || listaPedidoBD.get().isEmpty()) {
+            throw new ListaPedidoVaziaException("Lista de pedidos vazia!");
         }
+        
+        List<PedidoDTO> listaPedidoDto = listaPedidoBD.get().stream().map(pedidoBD -> mapper.map(pedidoBD, PedidoDTO.class)).collect(Collectors.toList());
+        return listaPedidoDto;
     }
 
-    public ResponseEntity<List<PedidoDTO>> listarPorIdCliente(@PathVariable("idCliente") Long idCliente) {
+    public List<PedidoDTO> listarPorIdCliente(Long idCliente) throws ListaPedidoVaziaException {
         Optional<List<Pedido>> listaPedidoBD = pedidoRepository.findByClienteIdCliente(idCliente);
-        if (listaPedidoBD.get().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } else {
-            List<PedidoDTO> listaPedidoDTO = listaPedidoBD.get().stream().map(pedido -> {
-                PedidoDTO pedidoDTO = new PedidoDTO(pedido);
-                return pedidoDTO;
-            }).collect(Collectors.toList());
-            return ResponseEntity.ok(listaPedidoDTO);
+        if (!listaPedidoBD.isPresent() || listaPedidoBD.get().isEmpty()) {
+            throw new ListaPedidoVaziaException("Lista de pedidos vazia!");
         }
-    }
 
-    public boolean validaDadosCadastrarPedido(PedidoDTO pedidoDTO) {
-        boolean numeroPedidoValido = pedidoDTO.getNumeroPedido() == 0;
-        boolean idClienteValido = pedidoDTO.getIdCliente() != 0;
-        boolean listaPedidoRoupasValida = !pedidoDTO.getListaPedidoRoupas().isEmpty();
-        return numeroPedidoValido && idClienteValido && listaPedidoRoupasValida;
-    }
-
-    public boolean validaDadosAtualizarPedidoPorCliente(PedidoDTO pedidoDTO) {
-        boolean situacaoValida = !pedidoDTO.getSituacao().toString().isEmpty();
-        return situacaoValida;
-    }
-
-    public boolean validaDadosAtualizarPedidoPorFuncionario(PedidoDTO pedidoDTO) {
-        boolean situacaoValida = !pedidoDTO.getSituacao().toString().isEmpty();
-        return situacaoValida;
+        List<PedidoDTO> listaPedidoDto = listaPedidoBD.get().stream().map(pedidoBD -> mapper.map(pedidoBD, PedidoDTO.class)).collect(Collectors.toList());
+        return listaPedidoDto;
     }
     
 }

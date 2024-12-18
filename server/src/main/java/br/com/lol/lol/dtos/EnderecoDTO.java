@@ -1,6 +1,8 @@
 package br.com.lol.lol.dtos;
 
-import br.com.lol.lol.models.Endereco;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,29 +12,36 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EnderecoDTO {
+    @NotBlank(message = "CEP eh obrigatorio")
+    @Pattern(regexp = "\\d{8}", message = "CEP deve conter exatamente 8 digitos")
     private String cep;
-    private String uf;
+    
+    @NotBlank(message = "Estado eh obrigatorio")
+    @Pattern(regexp = "^[a-zA-Z\\u00C0-\\u00FF\\s0-9]+$", message = "Estado invalido")
+    @Size(min = 2, max = 50, message = "Estado deve ter entre 2 e 50 caracteres")
+    private String estado;
+
+    @NotBlank(message = "Cidade eh obrigatorio")
+    @Pattern(regexp = "^[a-zA-Z\\u00C0-\\u00FF\\s0-9]+$", message = "Cidade invalido")
+    @Size(min = 2, max = 50, message = "Cidade deve ter entre 2 e 50 caracteres")
     private String cidade;
+
+    @NotBlank(message = "Bairro eh obrigatorio")
+    @Pattern(regexp = "^[a-zA-Z\\u00C0-\\u00FF\\s0-9]+$", message = "Bairro invalido")
+    @Size(min = 2, max = 50, message = "Bairro deve ter entre 2 e 50 caracteres")
     private String bairro;
+
+    @NotBlank(message = "Rua eh obrigatorio")
+    @Pattern(regexp = "^[a-zA-Z\\u00C0-\\u00FF\\s0-9]+$", message = "Rua invalido")
+    @Size(min = 2, max = 100, message = "Rua deve ter entre 2 e 100 caracteres")
     private String rua;
+
+    @NotBlank(message = "Numero eh obrigatorio")
+    @Pattern(regexp = "^[a-zA-Z\\u00C0-\\u00FF\\s0-9]+$", message = "Numero invalido")
+    @Size(min = 2, max = 50, message = "Rua deve ter entre 2 e 50 caracteres")
     private String numero;
+    
+    @Pattern(regexp = "^[a-zA-Z\\u00C0-\\u00FF\\s0-9]+$", message = "Complemento invalido")
+    @Size(min = 2, max = 100, message = "Complemento deve ter entre 2 e 100 caracteres")
     private String complemento;
-
-    public EnderecoDTO(Endereco endereco) {
-        this.cep = endereco.getCep();
-        this.uf = endereco.getUf();
-        this.cidade = endereco.getCidade();
-        this.bairro = endereco.getBairro();
-        this.rua = endereco.getRua();
-        this.numero = endereco.getNumero();
-        this.complemento = endereco.getComplemento();
-    }
-
-    public EnderecoDTO(EnderecoApiDTO enderecoApiDTO) {
-        this.cep = enderecoApiDTO.getCep();
-        this.uf = enderecoApiDTO.getUf();
-        this.cidade = enderecoApiDTO.getCidade();
-        this.bairro = enderecoApiDTO.getBairro();
-        this.rua = enderecoApiDTO.getRua();
-    }
 }

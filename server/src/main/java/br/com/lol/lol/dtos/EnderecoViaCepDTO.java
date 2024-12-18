@@ -10,15 +10,17 @@ import lombok.Setter;
 @Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EnderecoApiDTO {
+public class EnderecoViaCepDTO {
     @JsonProperty("cep")
     private String cep;
-    @JsonProperty("uf")
-    private String uf;
+    @JsonProperty("estado")
+    private String estado;
     @JsonProperty("localidade")
     private String cidade;
     @JsonProperty("bairro")
     private String bairro;
     @JsonProperty("logradouro")
     private String rua;
+    private String numero;
+    private String complemento = "";
 }

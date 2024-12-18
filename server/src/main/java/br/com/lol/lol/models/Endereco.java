@@ -17,13 +17,13 @@ public class Endereco implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="id_endereco")
-    private Long idEndereco;
+    private Long idEndereco = 0L;
 
     @Column(name="cep", nullable = false)
     private String cep;
 
-    @Column(name="uf", nullable = false)
-    private String uf;
+    @Column(name="estado", nullable = false)
+    private String estado;
 
     @Column(name="cidade", nullable = false)
     private String cidade;

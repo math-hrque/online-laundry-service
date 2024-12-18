@@ -1,25 +1,29 @@
 package br.com.lol.lol.services;
 
 import java.util.Optional;
-import java.util.Random;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import br.com.lol.lol.dtos.ClienteDTO;
 import br.com.lol.lol.enums.TipoPermissao;
+import br.com.lol.lol.exeptions.UsuarioJaExisteException;
+import br.com.lol.lol.exeptions.UsuarioNaoExisteException;
 import br.com.lol.lol.models.Cliente;
-import br.com.lol.lol.models.Permissao;
+import br.com.lol.lol.models.Usuario;
 import br.com.lol.lol.repositories.ClienteRepository;
 import br.com.lol.lol.repositories.PermissaoRepository;
+import br.com.lol.lol.repositories.UsuarioRepository;
+import br.com.lol.lol.utils.Generate;
 
 @Service
 public class ClienteService {
+
+    @Autowired
+    private ModelMapper mapper;
 
     @Autowired
     private EmailService emailService;
@@ -31,56 +35,41 @@ public class ClienteService {
     private ClienteRepository clienteRepository;
 
     @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
     private PermissaoRepository permissaoRepository;
 
-    public ResponseEntity<ClienteDTO> cadastrar(@RequestBody Cliente cliente) {
-        if (validaDadosCadastrarCliente(cliente)) {
-            cliente.getUsuario().setEmail(cliente.getUsuario().getEmail().toLowerCase());
-            Optional<Cliente> clienteBD = clienteRepository.findByUsuarioEmailOrCpf(cliente.getUsuario().getEmail(), cliente.getCpf());
-            if (clienteBD.isPresent()) {
-                ClienteDTO clienteDTOExistente = new ClienteDTO(clienteBD.get());
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(clienteDTOExistente);
-            } else {
-                Optional<Permissao> permissao = permissaoRepository.findByTipoPermissao(cliente.getUsuario().getPermissao().getTipoPermissao());
-                if (permissao.isPresent()) {
-                    cliente.getUsuario().setPermissao(permissao.get());
-                    String senhaAleatoria = String.format("%04d", new Random().nextInt(10000));
-                    try {
-                        emailService.sendEmail(cliente.getUsuario().getEmail(), "Cadastro no LOL - Lavanderia On-Line", "Sua senha de acesso é: " + senhaAleatoria);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-                    }
-                    cliente.getUsuario().setSenha(passwordEncoder.encode(senhaAleatoria));
-                    Cliente clienteSalvo = clienteRepository.save(cliente);
-                    ClienteDTO clienteDTOSalvo = new ClienteDTO(clienteSalvo);
-                    return ResponseEntity.status(HttpStatus.CREATED).body(clienteDTOSalvo);
-                } else {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-                }
-            }   
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    public ClienteDTO cadastrar(@RequestBody Cliente cliente) throws UsuarioJaExisteException {
+        cliente.getUsuario().setEmail(cliente.getUsuario().getEmail().toLowerCase());
+        Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(cliente.getUsuario().getEmail());
+        Optional<Cliente> clienteExistente = clienteRepository.findByCpf(cliente.getCpf());
+        if (usuarioExistente.isPresent() || clienteExistente.isPresent()) {
+            throw new UsuarioJaExisteException("Usuario com email e/ou CPF ja existe!");
         }
+
+        cliente.getUsuario().setPermissao(permissaoRepository.findByTipoPermissao(TipoPermissao.CLIENTE).get());
+        String senha = Generate.generatePassword();
+        cliente.getUsuario().setSenha(passwordEncoder.encode(senha));
+        Cliente clienteCadastrado = clienteRepository.save(cliente);
+        ClienteDTO clienteCadastradoDto = mapper.map(clienteCadastrado, ClienteDTO.class);
+
+        String mensagem = "<p>Bem vindo a Lavanderia Online!<br><br>" + 
+        "Acesse a sua conta com o email cadastrado e a senha abaixo:<br><br>" +
+        "<strong style='font-size: 16px;'>Sua senha: " + senha + "</strong></p>";
+        emailService.enviarEmail(clienteCadastradoDto.getUsuario().getEmail(), "Cadastro - Lavanderia Online", mensagem);
+
+        return clienteCadastradoDto;
     }
 
-    public ResponseEntity<ClienteDTO> consultar(@PathVariable("idUsuario") Long idUsuario) {
-        return clienteRepository.findByUsuarioIdUsuario(idUsuario).map(clienteBD -> {
-            ClienteDTO clienteDTO = new ClienteDTO(clienteBD);
-            return ResponseEntity.ok(clienteDTO);
-        }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-    }
+    public ClienteDTO consultar(Long idUsuario) throws UsuarioNaoExisteException {
+        Optional<Cliente> clienteBD = clienteRepository.findByUsuarioIdUsuario(idUsuario);
+        if (!clienteBD.isPresent()) {
+            throw new UsuarioNaoExisteException("Cliente com esse idUsuario nao existe!");
+        }
 
-    public boolean validaDadosCadastrarCliente(Cliente cliente) {
-        boolean idUsuarioValido = cliente.getUsuario().getIdUsuario() == 0;
-        boolean idClienteValido = cliente.getIdCliente() == 0;
-        boolean emailValido = !cliente.getUsuario().getEmail().isEmpty();
-        boolean nomeValido = !cliente.getUsuario().getNome().isEmpty();
-        boolean permissaoValida = cliente.getUsuario().getPermissao().getTipoPermissao().equals(TipoPermissao.CLIENTE);
-        boolean cpfValido = cliente.getCpf().length() == 11 && cliente.getCpf().chars().allMatch(Character::isDigit);
-        boolean telefoneValido = cliente.getTelefone().length() == 11 && cliente.getTelefone().chars().allMatch(Character::isDigit);
-        boolean enderecoValido = cliente.getEndereco().getCep().length() == 8 && cliente.getEndereco().getCep().chars().allMatch(Character::isDigit);
-        return idUsuarioValido && idClienteValido && emailValido && nomeValido && permissaoValida && cpfValido && telefoneValido && enderecoValido;
+        ClienteDTO clienteConsultadoDto = mapper.map(clienteBD.get(), ClienteDTO.class);
+        return clienteConsultadoDto;
     }
 
 }

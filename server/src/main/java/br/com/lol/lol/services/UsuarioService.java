@@ -2,15 +2,15 @@ package br.com.lol.lol.services;
 
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import br.com.lol.lol.dtos.UsuarioRequestDTO;
 import br.com.lol.lol.dtos.UsuarioResponseDTO;
+import br.com.lol.lol.exeptions.UsuarioNaoExisteException;
 import br.com.lol.lol.models.Usuario;
 import br.com.lol.lol.repositories.UsuarioRepository;
 
@@ -18,34 +18,28 @@ import br.com.lol.lol.repositories.UsuarioRepository;
 public class UsuarioService {
 
     @Autowired
+    private ModelMapper mapper;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
     
-    public ResponseEntity<UsuarioResponseDTO> login(@RequestBody UsuarioRequestDTO usuarioRequestDTO) {
-        if (validaDadosLogin(usuarioRequestDTO)) {
-            usuarioRequestDTO.setEmail(usuarioRequestDTO.getEmail().toLowerCase());
-            Optional<Usuario> usuarioBD = usuarioRepository.findByEmail(usuarioRequestDTO.getEmail());
-            if (usuarioBD.isPresent()) {
-                if (passwordEncoder.matches(usuarioRequestDTO.getSenha(), usuarioBD.get().getSenha())) {
-                    UsuarioResponseDTO usuarioResponseDTO = new UsuarioResponseDTO(usuarioBD.get());
-                    return ResponseEntity.ok(usuarioResponseDTO);
-                } else {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-                }
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-    }
+    public UsuarioResponseDTO login(UsuarioRequestDTO usuarioRequestDTO) throws UsuarioNaoExisteException, BadCredentialsException {
+        usuarioRequestDTO.setEmail(usuarioRequestDTO.getEmail().toLowerCase());
+        Optional<Usuario> usuarioBD = usuarioRepository.findByEmail(usuarioRequestDTO.getEmail());
 
-    public boolean validaDadosLogin(UsuarioRequestDTO usuarioRequestDTO) {
-        boolean emailValido = !usuarioRequestDTO.getEmail().isEmpty();
-        boolean senhaValida = !usuarioRequestDTO.getSenha().isEmpty();
-        return emailValido && senhaValida;
+        if (!usuarioBD.isPresent()) {
+            throw new UsuarioNaoExisteException("Usuario nao existe!");
+        }
+
+        if (!passwordEncoder.matches(usuarioRequestDTO.getSenha(), usuarioBD.get().getSenha())) {
+            throw new BadCredentialsException("Senha invalida!");
+        }
+
+        UsuarioResponseDTO usuarioResponseDTO = mapper.map(usuarioBD.get(), UsuarioResponseDTO.class);
+        return usuarioResponseDTO;
     }
 
 }

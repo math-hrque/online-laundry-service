@@ -1,42 +1,49 @@
 package br.com.lol.lol.services;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestTemplate;
 
-import br.com.lol.lol.dtos.EnderecoApiDTO;
+import br.com.lol.lol.dtos.EnderecoViaCepDTO;
 import br.com.lol.lol.dtos.EnderecoDTO;
+import br.com.lol.lol.exeptions.CepInvalidoException;
+import br.com.lol.lol.exeptions.CepNaoExisteException;
 
 @Service
 public class EnderecoService {
 
     @Autowired
+    private ModelMapper mapper;
+
+    @Autowired
     private RestTemplate restTemplate;
 
     private static final String CEP_PATTERN = "\\d{8}";
+    private static final String BASE_URL = "https://viacep.com.br/ws/";
+    private static final String JSON_URL = "/json/";
 
-    public ResponseEntity<EnderecoDTO> consultar(@PathVariable("cep") String cep) {
-        if (cep.matches(CEP_PATTERN)) {
-            try {
-                String url = "https://viacep.com.br/ws/" + cep + "/json/";
-                EnderecoApiDTO enderecoApiDTO = restTemplate.getForObject(url, EnderecoApiDTO.class);
-
-                if (enderecoApiDTO.getCep() == null) {
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-                }
-                
-                EnderecoDTO enderecoDTO = new EnderecoDTO(enderecoApiDTO);
-                return new ResponseEntity<>(enderecoDTO, HttpStatus.OK);
-    
-            } catch (Exception e) {
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public EnderecoDTO consultar(String cep) throws CepNaoExisteException, CepInvalidoException {
+        if (!cep.matches(CEP_PATTERN)) {
+            throw new CepInvalidoException("CEP invalido!");
         }
+    
+        String url = BASE_URL + cep + JSON_URL;
+        EnderecoViaCepDTO enderecoViaCepDto = null;
+
+        try {
+            enderecoViaCepDto = restTemplate.getForObject(url, EnderecoViaCepDTO.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao consultar o serviço de CEP: " + e.getMessage(), e);
+        }
+
+        if (enderecoViaCepDto == null || enderecoViaCepDto.getCep() == null) {
+            throw new CepNaoExisteException("CEP nao existe!");
+        } 
+        EnderecoDTO enderecoDto = mapper.map(enderecoViaCepDto, EnderecoDTO.class);
+        enderecoDto.setCidade(enderecoViaCepDto.getCidade());
+        enderecoDto.setRua(enderecoViaCepDto.getRua());
+        return enderecoDto;
     }
     
 }

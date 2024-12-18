@@ -1,6 +1,6 @@
 # online-laundry-service
 
-_An application to manage and track online laundry services seamlessly._
+_An application to manage and track online laundry services seamlessly_
 
 ## Introduction
 **Online Laundry Service** is a web application designed to simplify laundry management. Customers can register, request clothes to be washed, and track the status of their laundry online. Employees manage the laundry status through the system until the clothes are cleaned and ready to be returned.

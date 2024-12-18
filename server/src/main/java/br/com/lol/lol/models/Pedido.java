@@ -8,13 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
-
-import br.com.lol.lol.dtos.PedidoDTO;
-import br.com.lol.lol.dtos.PedidoRoupaDTO;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -58,25 +54,7 @@ public class Pedido implements Serializable {
     @OneToMany(mappedBy="pedido", fetch=FetchType.LAZY, cascade = CascadeType.ALL)
     private List<PedidoRoupa> listaPedidoRoupas;
 
-    public void cadastrar(PedidoDTO pedidoDTO, Situacao situacao) {
-        this.cliente = new Cliente(pedidoDTO.getIdCliente());
-        this.situacao = situacao;
-        this.orcamento = pedidoDTO.getOrcamento();
-        this.orcamento.setIdOrcamento(null);
-        List<PedidoRoupa> listaPedidoRoupas = new ArrayList<>();
-        for (PedidoRoupaDTO pedidoRoupaDTO  : pedidoDTO.getListaPedidoRoupas()) {
-            Roupa roupa = new Roupa();
-            roupa.atualizar(pedidoRoupaDTO.getRoupa().getIdRoupa(), pedidoRoupaDTO.getRoupa());
-            PedidoRoupa pedidoRoupa = new PedidoRoupa();
-            pedidoRoupa.cadastrar(pedidoRoupaDTO.getQuantidade(), this, roupa);
-            listaPedidoRoupas.add(pedidoRoupa);
-        }
-        this.listaPedidoRoupas = listaPedidoRoupas;
-    }
-
-    public void pagar(Situacao situacao) {
-        this.situacao = situacao;
+    public void pagar() {
         this.dataPagamento = LocalDateTime.now().atOffset(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now()));
     }
-
 }

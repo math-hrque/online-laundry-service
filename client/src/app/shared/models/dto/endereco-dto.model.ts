@@ -1,6 +1,6 @@
 export class EnderecoDto {
   cep: string = '';
-  uf: string = '';
+  estado: string = '';
   cidade: string = '';
   bairro: string = '';
   rua: string = '';

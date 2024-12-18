@@ -29,10 +29,4 @@ public class PedidoRoupa implements Serializable {
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="id_roupa", updatable = false, nullable = false)
     private Roupa roupa;
-
-    public void cadastrar(int quantidade, Pedido pedido, Roupa roupa) {
-        this.quantidade = quantidade;
-        this.pedido = pedido;
-        this.roupa = roupa;
-    }
 }

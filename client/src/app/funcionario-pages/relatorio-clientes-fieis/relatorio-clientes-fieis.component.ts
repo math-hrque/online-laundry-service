@@ -135,7 +135,7 @@ export class RelatorioClientesFieisComponent implements OnInit {
       margin: { left: 5, right: 5 },
     });
 
-    doc.save('relatorio-clientes.pdf');
+    doc.save('relatorio-clientes-fieis.pdf');
   }
 
   voltar() {

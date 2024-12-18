@@ -1,11 +1,12 @@
 package br.com.lol.lol.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
@@ -13,21 +14,16 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
-    private String remetente;
-
-    public void sendEmail(String to, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(remetente);
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
+    public void enviarEmail(String destinatario, String assunto, String mensagem) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
         try {
-            mailSender.send(message);
-        } catch (MailException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Erro ao enviar email", e);
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(destinatario);
+            helper.setSubject(assunto);
+            helper.setText(mensagem, true);
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Erro ao enviar email para " + destinatario, e);
         }
     }
-
 }

@@ -1,7 +1,7 @@
 export class Endereco {
   idEndereco: number = 0;
   cep: string = '';
-  uf: string = '';
+  estado: string = '';
   cidade: string = '';
   bairro: string = '';
   rua: string = '';

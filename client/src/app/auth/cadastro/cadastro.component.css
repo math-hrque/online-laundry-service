@@ -67,6 +67,10 @@ body {
     color: #6b6771;
 }
 
+.form-floating label {
+    margin-top: -2px;
+}
+
 .custom-input:focus {
     border-color: #6fb5df;
     box-shadow: 0 0 0 0.2rem #a5d7f3;

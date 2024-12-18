@@ -33,8 +33,4 @@ public class Cliente implements Serializable {
     @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name="id_endereco", nullable = false)
     private Endereco endereco;
-
-    public Cliente(Long idCliente) {
-        this.idCliente = idCliente;
-    }
 }

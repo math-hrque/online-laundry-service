@@ -24,7 +24,7 @@ export class CadastroComponent {
   cadastroEmail: string = '';
   cadastroNome: string = '';
   cadastroCep: string = '';
-  cadastroUf: string = '';
+  cadastroEstado: string = '';
   cadastroCidade: string = '';
   cadastroBairro: string = '';
   cadastroRua: string = '';
@@ -49,7 +49,7 @@ export class CadastroComponent {
       this.usuario.permissao.tipoPermissao = 'CLIENTE';
       this.usuario.permissao.idPermissao = 1;
       this.endereco.cep = this.cadastroCep;
-      this.endereco.uf = this.cadastroUf;
+      this.endereco.estado = this.cadastroEstado;
       this.endereco.cidade = this.cadastroCidade;
       this.endereco.bairro = this.cadastroBairro;
       this.endereco.rua = this.cadastroRua;
@@ -74,7 +74,7 @@ export class CadastroComponent {
       this.enderecoService.consultar(cep).subscribe({
         next: (endereco) => {
           if (endereco) {
-            this.cadastroUf = endereco.uf ?? '';
+            this.cadastroEstado = endereco.estado ?? '';
             this.cadastroCidade = endereco.cidade ?? '';
             this.cadastroBairro = endereco.bairro ?? '';
             this.cadastroRua = endereco.rua ?? '';
@@ -95,7 +95,7 @@ export class CadastroComponent {
   }
 
   private limparCamposEndereco() {
-    this.cadastroUf = '';
+    this.cadastroEstado = '';
     this.cadastroCidade = '';
     this.cadastroBairro = '';
     this.cadastroRua = '';
